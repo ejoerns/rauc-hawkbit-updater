@@ -100,7 +100,7 @@ struct on_install_complete_userdata {
 };
 
 void hawkbit_init(struct config *config, GSourceFunc on_install_ready);
-int hawkbit_start_service_sync();
+int hawkbit_start_service_sync(void);
 gboolean hawkbit_progress(const gchar *msg);
 gboolean install_complete_cb(gpointer ptr);
 
