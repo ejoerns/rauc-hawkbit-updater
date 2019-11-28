@@ -116,6 +116,7 @@ int main(int argc, char **argv)
         GError *error = NULL;
         GOptionContext *context;
         gint exit_code = 0;
+        struct config *config = NULL;
         GLogLevelFlags log_level;
 
         context = g_option_context_new("");
@@ -149,7 +150,7 @@ int main(int argc, char **argv)
                 force_check_run = TRUE;
         }
 
-        struct config *config = load_config_file(config_file, &error);
+        config = load_config_file(config_file, &error);
         if (config == NULL) {
                 g_printerr("Loading config file failed: %s\n", error->message);
                 g_error_free(error);
