@@ -496,7 +496,7 @@ static void process_artifact_cleanup(struct artifact *artifact)
         g_free(artifact);
 }
 
-static void process_deployment_cleanup()
+static void process_deployment_cleanup(void)
 {
         //g_clear_pointer(action_id, g_free);
         gpointer ptr = action_id;
@@ -804,7 +804,7 @@ static gboolean hawkbit_pull_cb(gpointer user_data)
         return G_SOURCE_CONTINUE;
 }
 
-int hawkbit_start_service_sync()
+int hawkbit_start_service_sync(void)
 {
         GMainContext *ctx;
         ClientData cdata;
