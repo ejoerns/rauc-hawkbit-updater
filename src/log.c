@@ -47,6 +47,12 @@ static const gchar *log_level_to_string(GLogLevelFlags level)
                 return "INFO";
         case G_LOG_LEVEL_DEBUG:
                 return "DEBUG";
+        case G_LOG_FLAG_FATAL:
+                return "FATAL";
+        case G_LOG_FLAG_RECURSION:
+                return "RECURSION";
+        case G_LOG_LEVEL_MASK:
+                return "MASK";
         default:
                 return "UNKNOWN";
         }
@@ -74,6 +80,13 @@ static int log_level_to_int(GLogLevelFlags level)
                 return LOG_INFO;
         case G_LOG_LEVEL_DEBUG:
                 return LOG_DEBUG;
+        case G_LOG_FLAG_FATAL:
+                return LOG_FATAL;
+        case G_LOG_FLAG_RECURSION:
+                return LOG_RECURSION;
+        case G_LOG_LEVEL_MASK:
+                return LOG_MASK;
+
         default:
                 return LOG_INFO;
         }
