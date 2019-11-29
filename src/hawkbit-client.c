@@ -601,7 +601,7 @@ static gboolean process_deployment(JsonNode *req_root, GError **error)
         g_autofree gchar *str = NULL;
 
         if (action_id) {
-                g_warning("Deployment is already in progress...");
+                g_set_error (error,1,0,"Deployment is already in progress...");
                 return FALSE;
         }
 
@@ -635,7 +635,7 @@ static gboolean process_deployment(JsonNode *req_root, GError **error)
         JsonParser *json_response_parser = NULL;
         int status = rest_request(GET, get_resource_url, NULL, &json_response_parser, error);
         if (status != 200 || json_response_parser == NULL) {
-                g_debug("Failed to get resource from hawkbit server. Status: %d", status);
+                g_set_error (error,1,3,"Failed to get resource from hawkbit server. Status: %d", status);
                 goto proc_error;
         }
         JsonNode *resp_root = json_parser_get_root(json_response_parser);
