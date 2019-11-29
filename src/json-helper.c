@@ -72,7 +72,7 @@ JsonArray* json_get_array(JsonNode *json_node, const gchar *path)
         return res_arr;
 }
 
-gboolean json_contains(JsonNode *root, gchar *key)
+gboolean json_contains(JsonNode *root, const gchar *key)
 {
         JsonNode *node = json_path_query(key, root, NULL);
         gboolean result = (node != NULL && json_array_get_length(json_node_get_array(node)) > 0);

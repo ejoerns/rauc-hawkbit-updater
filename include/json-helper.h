@@ -28,6 +28,6 @@
 gchar* json_get_string(JsonNode *json_node, const gchar *path);
 gint64 json_get_int(JsonNode *json_node, const gchar *path);
 JsonArray* json_get_array(JsonNode *json_node, const gchar *path);
-gboolean json_contains(JsonNode *root, gchar *key);
+gboolean json_contains(JsonNode *root, const gchar *key);
 
 #endif // __JSON_HELPER_H__
