@@ -387,7 +387,7 @@ static void json_build_status(JsonBuilder *builder, const gchar *id, const gchar
 /**
  * @brief Send feedback to hawkBit.
  */
-static gboolean feedback(gchar *url, gchar *id, gchar *detail, gchar *finished, gchar *execution, GError **error)
+static gboolean feedback(gchar *url, gchar *id, const gchar *detail, const gchar *finished, const gchar *execution, GError **error)
 {
         JsonBuilder *builder = json_builder_new();
         json_build_status(builder, id, detail, finished, execution, NULL, 0);
