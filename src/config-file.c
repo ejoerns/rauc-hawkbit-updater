@@ -66,17 +66,18 @@ static gboolean get_key_string(GKeyFile *key_file, const gchar* group, const gch
 static gboolean get_key_bool(GKeyFile *key_file, const gchar* group, const gchar* key, gboolean* value, const gboolean default_value, GError **error)
 {
         g_autofree gchar *val = NULL;
+        gboolean val_false, val_true;
         val = g_key_file_get_string(key_file, group, key, NULL);
         if (val == NULL) {
                 *value = default_value;
                 return TRUE;
         }
-        gboolean val_false = (g_strcmp0(val, "0") == 0 || g_ascii_strcasecmp(val, "no") == 0 || g_ascii_strcasecmp(val, "false") == 0);
+        val_false = (g_strcmp0(val, "0") == 0 || g_ascii_strcasecmp(val, "no") == 0 || g_ascii_strcasecmp(val, "false") == 0);
         if (val_false) {
                 *value = FALSE;
                 return TRUE;
         }
-        gboolean val_true = (g_strcmp0(val, "1") == 0 || g_ascii_strcasecmp(val, "yes") == 0 || g_ascii_strcasecmp(val, "true") == 0);
+        val_true = (g_strcmp0(val, "1") == 0 || g_ascii_strcasecmp(val, "yes") == 0 || g_ascii_strcasecmp(val, "true") == 0);
         if (val_true) {
                 *value = TRUE;
                 return TRUE;
