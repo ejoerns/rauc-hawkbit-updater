@@ -118,27 +118,31 @@ static size_t curl_write_to_file_cb(void *ptr, size_t size, size_t nmemb, struct
  */
 static gboolean get_binary(const gchar* download_url, const gchar* file, gint64 filesize, struct get_binary_checksum *checksum, gint *http_code, GError **error)
 {
-        FILE *fp = fopen(file, "wb");
-        if (fp == NULL) {
-                g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
-                            "Failed to open file for download: %s", file);
-                return FALSE;
-        }
-
-        CURL *curl = curl_easy_init();
-        if (!curl) {
-                fclose(fp);
-                g_set_error(error, G_IO_ERROR, G_IO_ERROR_FAILED,
-                            "Unable to start libcurl easy session");
-                return FALSE;
-        }
-
+        FILE *fp = NULL;
+        CURL *curl = NULL;
         struct get_binary gb = {
                 .fp       = fp,
                 .filesize = filesize,
                 .written  = 0,
                 .checksum = (checksum != NULL ? g_checksum_new(checksum->checksum_type) : NULL)
         };
+        struct curl_slist *headers = NULL;
+        CURLcode res;
+
+        fp = fopen(file, "wb");
+        if (fp == NULL) {
+                g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_FAILED,
+                            "Failed to open file for download: %s", file);
+                return FALSE;
+        }
+
+        curl = curl_easy_init();
+        if (!curl) {
+                fclose(fp);
+                g_set_error(error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                            "Unable to start libcurl easy session");
+                return FALSE;
+        }
 
         curl_easy_setopt(curl, CURLOPT_URL, download_url);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, HAWKBIT_USERAGENT);
@@ -152,7 +156,6 @@ static gboolean get_binary(const gchar* download_url, const gchar* file, gint64 
         curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, 60L);
         curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 100L);
         // Setup request headers
-        struct curl_slist *headers = NULL;
         headers = curl_slist_append(headers, "Accept: application/octet-stream");
         if (hawkbit_config->auth_token) {
                 g_autofree gchar* auth_token = g_strdup_printf("Authorization: TargetToken %s", hawkbit_config->auth_token);
@@ -163,7 +166,7 @@ static gboolean get_binary(const gchar* download_url, const gchar* file, gint64 
         }
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-        CURLcode res = curl_easy_perform(curl);
+        res = curl_easy_perform(curl);
         if (http_code)
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, http_code);
         if (res == CURLE_OK) {
@@ -221,6 +224,9 @@ static gint rest_request(enum HTTPMethod method, const gchar* url, JsonBuilder* 
 {
         gchar *postdata = NULL;
         struct rest_payload fetch_buffer;
+        struct curl_slist *headers = NULL;
+        int http_code = 0;
+        CURLcode res;
 
         CURL *curl = curl_easy_init();
         if (!curl) return -1;
@@ -246,10 +252,10 @@ static gint rest_request(enum HTTPMethod method, const gchar* url, JsonBuilder* 
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, hawkbit_config->ssl_verify ? 1L : 0L);
 
         if (jsonRequestBody) {
+                gsize length;
                 // Convert request into a string
                 JsonGenerator *generator = json_generator_new();
                 json_generator_set_root(generator, json_builder_get_root(jsonRequestBody));
-                gsize length;
                 postdata = json_generator_to_data(generator, &length);
                 g_object_unref(generator);
                 curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postdata);
@@ -257,7 +263,6 @@ static gint rest_request(enum HTTPMethod method, const gchar* url, JsonBuilder* 
         }
 
         // Setup request headers
-        struct curl_slist *headers = NULL;
         headers = curl_slist_append(headers, "Accept: application/json;charset=UTF-8");
         if (hawkbit_config->auth_token) {
                 g_autofree gchar* auth_token = g_strdup_printf("Authorization: TargetToken %s", hawkbit_config->auth_token);
@@ -272,8 +277,7 @@ static gint rest_request(enum HTTPMethod method, const gchar* url, JsonBuilder* 
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
         // perform request
-        CURLcode res = curl_easy_perform(curl);
-        int http_code = 0;
+        res = curl_easy_perform(curl);
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         if (res == CURLE_OK && http_code == 200) {
                 if (jsonResponseParser && fetch_buffer.size > 0) {
@@ -390,9 +394,10 @@ static void json_build_status(JsonBuilder *builder, const gchar *id, const gchar
 static gboolean feedback(gchar *url, gchar *id, const gchar *detail, const gchar *finished, const gchar *execution, GError **error)
 {
         JsonBuilder *builder = json_builder_new();
+	int status;
         json_build_status(builder, id, detail, finished, execution, NULL, 0);
 
-        int status = rest_request(POST, url, builder, NULL, error);
+        status = rest_request(POST, url, builder, NULL, error);
         g_debug("Feedback status: %d, URL: %s", status, url);
         g_object_unref(builder);
         return (status == 200);
