@@ -555,10 +555,10 @@ static gpointer download_thread(gpointer data)
                                   artifact->size, &checksum, &status, &error);
         gint64 end_time = g_get_monotonic_time();
         if (!res) {
-                g_autofree gchar *msg = g_strdup_printf("Download failed: %s Status: %d", error->message, status);
+                g_autofree gchar *errmsg = g_strdup_printf("Download failed: %s Status: %d", error->message, status);
                 g_clear_error(&error);
-                g_critical("%s", msg);
-                feedback(artifact->feedback_url, action_id, msg, "failure", "closed", NULL);
+                g_critical("%s", errmsg);
+                feedback(artifact->feedback_url, action_id, errmsg, "failure", "closed", NULL);
                 goto down_error;
         }
 
@@ -570,13 +570,13 @@ static gpointer download_thread(gpointer data)
 
         // validate checksum
         if (g_strcmp0(artifact->sha1, checksum.checksum_result)) {
-                g_autofree gchar *msg = g_strdup_printf(
+                g_autofree gchar *errmsg = g_strdup_printf(
                         "Software: %s V%s. Invalid checksum: %s expected %s",
                         artifact->name, artifact->version,
                         checksum.checksum_result,
                         artifact->sha1);
-                feedback(artifact->feedback_url, action_id, msg, "failure", "closed", NULL);
-                g_critical("%s", msg);
+                feedback(artifact->feedback_url, action_id, errmsg, "failure", "closed", NULL);
+                g_critical("%s", errmsg);
                 status = -3;
                 goto down_error;
         }
