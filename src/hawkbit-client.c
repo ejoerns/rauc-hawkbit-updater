@@ -692,11 +692,9 @@ static gboolean process_deployment(JsonNode *req_root, GError **error)
         } else if (freespace < artifact->size) {
                 g_autofree gchar *msg = g_strdup_printf("Not enough free space. File size: %" G_GINT64_FORMAT  ". Free space: %ld",
                                                         artifact->size, freespace);
-                g_debug("%s", msg);
                 // Notify hawkbit that there is not enough free space.
                 feedback(feedback_url, action_id, msg, "failure", "closed", NULL);
                 g_set_error(error, 1, 23, "%s", msg);
-                status = -4;
                 goto proc_error;
         }
 
