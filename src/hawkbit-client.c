@@ -758,11 +758,17 @@ static gboolean hawkbit_pull_cb(gpointer user_data)
 
                         if (json_contains(json_root, "$._links.configData")) {
                                 // hawkBit has asked us to identify ourself
-                                identify(&error);
+                                if (!identify(&error)) {
+                                        g_warning("%s", error->message);
+                                        g_clear_error(&error);
+                                }
                         }
                         if (json_contains(json_root, "$._links.deploymentBase")) {
                                 // hawkBit has a new deployment for us
-                                process_deployment(json_root, &error);
+                                if (!process_deployment(json_root, &error)) {
+                                        g_warning("%s", error->message);
+                                        g_clear_error(&error);
+                                }
                         } else {
                                 g_message("No new software.");
                         }
@@ -773,9 +779,6 @@ static gboolean hawkbit_pull_cb(gpointer user_data)
 
                         g_object_unref(json_response_parser);
                 }
-
-                if (error)
-                        g_critical("Error: %s", error->message);
 
                 // sleep as long as specified by hawkbit
                 sleep_time = hawkbit_interval_check_sec;
