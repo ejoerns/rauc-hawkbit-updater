@@ -28,3 +28,35 @@ script:
    - docker run -d --name hawkbit -p 8080:8080 hawkbit/hawkbit-update-server
    - ./test/wait-for-hawkbit-online
    - cd test && ./rauc-hawkbit-updater.t -v
+
+jobs:
+  include:
+    - &cross
+      stage: Cross-Builds
+      name: armhf
+      before_install:
+        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      install:
+        - docker run --name cross -dit -v "$PWD":/home -w /home multiarch/debian-debootstrap:armhf-buster bash
+      before_script:
+        - docker exec -it cross uname -a
+        - docker exec -it cross apt-get update
+        - docker exec -it cross apt-get install -y build-essential cmake libcurl4-openssl-dev libsystemd-dev libjson-glib-dev
+      script:
+        - docker exec -it cross ls -la
+        - docker exec -it cross mkdir -p build
+        - docker exec -it cross /bin/sh -c 'cd build && cmake $CMAKE_PARAMS .. && make'
+      after_script:
+        - docker stop cross
+    - <<: *cross
+      name: arm64
+      install:
+        - docker run --name cross -dit -v "$PWD":/home -w /home multiarch/debian-debootstrap:arm64-buster bash
+    - <<: *cross
+      name: i386
+      install:
+        - docker run --name cross -dit -v "$PWD":/home -w /home multiarch/debian-debootstrap:i386-buster bash
+    - <<: *cross
+      name: armel
+      install:
+        - docker run --name cross -dit -v "$PWD":/home -w /home multiarch/debian-debootstrap:armel-buster bash
