@@ -12,6 +12,7 @@ addons:
      - libcurl4-openssl-dev
      - libsystemd-dev
      - libjson-glib-dev
+     - python3-pytest
 
 env:
   - CMAKE_PARAMS=-DWITH_SYSTEMD=ON
@@ -27,4 +28,4 @@ script:
    - docker pull hawkbit/hawkbit-update-server
    - docker run -d --name hawkbit -p 8080:8080 hawkbit/hawkbit-update-server
    - ./test/wait-for-hawkbit-online
-   - cd test && ./rauc-hawkbit-updater.t -v
+   - cd test && pytest-3 -vvs test.py
