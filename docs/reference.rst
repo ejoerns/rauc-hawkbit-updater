@@ -40,16 +40,74 @@ Example configuration:
 
 **[client] section**
 
-General notes about ``client`` section.
+Configures how to connect with the hawkBit server, etc.
 
-``key``
-  Description
+Mandatory options:
+
+``hawkbit_server=<host>[:<port>]``
+  The ip or hostname of the hawkbitServer to connect to.
+  The ``port`` can be provided optionally.
+  It needs to be separated with colons.
+
+``target_name=<name>``
+  Unique ``name`` string to identify controller.
+
+``auth_token=<token>``
+  Controller-specific authentication token.
+  This is set for each device individually.
+
+  .. note:: Either ``auth_token`` or ``gateway_token`` must be provided
+
+``gateway_token``
+  Gateway authentication token.
+  This is set by hawkBit.
+
+  .. note:: Either ``auth_token`` or ``gateway_token`` must be provided
+
+``bundle_download_location=<path>``
+  Full path to where the bundle should be downloaded to.
+  E.g. set to ``/tmp/_bundle.raucb`` to let rauc-hawkbit-updater use this
+  location withing ``/tmp``.
+
+Optional options:
+  
+``tenant_id=<ID>``
+  ID of the tenant to connect with. Defaults to ``DEFAULT``.
+
+``ssl=<boolean>``
+  Whether to use SSL connections (``https``) or not (``http``).
+  Defaults to true.
+
+``ssl_verify``
+  Whether to enforce SSL verification or not.
+  Defaults to true.
+
+``connect_timeout=<seconds>``
+  HTTP connection setup timeout [seconds].
+  Defaults to 20 seconds.
+
+``timeout=<seconds>``
+  HTTP request Timeout [seconds]
+  Defaults to 60 seconds.
+
+``retry_wait=<seconds>``
+  Time in seconds to wait before retrying [seconds]
+  Defaults to 60 seconds.
+
+``log_level=<level>``
+  Log level to print, where ``level`` is a string of
+
+  * debug
+  * info
+  * message
+  * critical
+  * error
+  * fatal
 
 .. _keyring-section:
 
 **[device] section**
 
-General notes about ``device`` section.
-
-``key``
-  Description
+This section allows to set a custom list of key-value pairs that will be used
+as config data target attribute for device registration.
+They can be used for target filtering.
